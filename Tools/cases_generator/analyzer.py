@@ -1137,6 +1137,9 @@ def assign_opcodes(
     # This is an historical oddity.
     instmap["BINARY_OP_INPLACE_ADD_UNICODE"] = 3
 
+    # Give this a stable opcode
+    instmap["EXTENDED_OPCODE"] = 127
+
     instmap["INSTRUMENTED_LINE"] = 254
     instmap["ENTER_EXECUTOR"] = 255
 

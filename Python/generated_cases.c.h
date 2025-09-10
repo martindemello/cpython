@@ -5539,6 +5539,17 @@
             DISPATCH_GOTO();
         }
 
+        TARGET(EXTENDED_OPCODE) {
+            #if Py_TAIL_CALL_INTERP
+            int opcode = EXTENDED_OPCODE;
+            (void)(opcode);
+            #endif
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
+            INSTRUCTION_STATS(EXTENDED_OPCODE);
+            DISPATCH();
+        }
+
         TARGET(FORMAT_SIMPLE) {
             #if Py_TAIL_CALL_INTERP
             int opcode = FORMAT_SIMPLE;

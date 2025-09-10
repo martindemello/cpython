@@ -306,6 +306,7 @@ const uint16_t _PyUop_Flags[MAX_UOP_ID+1] = {
     [_SWAP_2] = HAS_PURE_FLAG,
     [_SWAP_3] = HAS_PURE_FLAG,
     [_SWAP] = HAS_ARG_FLAG | HAS_PURE_FLAG,
+    [_EXTENDED_OPCODE] = 0,
     [_GUARD_IS_TRUE_POP] = HAS_EXIT_FLAG,
     [_GUARD_IS_FALSE_POP] = HAS_EXIT_FLAG,
     [_GUARD_IS_NONE_POP] = HAS_EXIT_FLAG,
@@ -452,6 +453,7 @@ const char *const _PyOpcode_uop_name[MAX_UOP_ID+1] = {
     [_EXIT_TRACE] = "_EXIT_TRACE",
     [_EXPAND_METHOD] = "_EXPAND_METHOD",
     [_EXPAND_METHOD_KW] = "_EXPAND_METHOD_KW",
+    [_EXTENDED_OPCODE] = "_EXTENDED_OPCODE",
     [_FATAL_ERROR] = "_FATAL_ERROR",
     [_FORMAT_SIMPLE] = "_FORMAT_SIMPLE",
     [_FORMAT_WITH_SPEC] = "_FORMAT_WITH_SPEC",
@@ -1244,6 +1246,8 @@ int _PyUop_num_popped(int opcode, int oparg)
         case _SWAP_3:
             return 0;
         case _SWAP:
+            return 0;
+        case _EXTENDED_OPCODE:
             return 0;
         case _GUARD_IS_TRUE_POP:
             return 1;

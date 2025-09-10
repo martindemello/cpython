@@ -5172,6 +5172,9 @@ dummy_func(
             }
         }
 
+        inst(EXTENDED_OPCODE, ( -- )) {
+        }
+
         tier1 inst(EXTENDED_ARG, ( -- )) {
             assert(oparg);
             opcode = next_instr->op.code;
