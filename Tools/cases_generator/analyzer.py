@@ -536,6 +536,8 @@ def tier_variable(node: parser.CodeDef) -> int | None:
         if token.kind == "ANNOTATION":
             if token.text == "specializing":
                 return 1
+            if token.text == "extended":
+                return 1
             if re.fullmatch(r"tier\d", token.text):
                 return int(token.text[-1])
     return None

@@ -143,7 +143,7 @@ dummy_func(
     switch (opcode) {
 
 // BEGIN BYTECODES //
-        tier1 inst(EXTENDED_NOP, (--)) {
+        extended inst(EXTENDED_NOP, (--)) {
         }
 
 
