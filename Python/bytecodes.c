@@ -5173,6 +5173,7 @@ dummy_func(
         }
 
         inst(EXTENDED_OPCODE, ( -- )) {
+
         }
 
         tier1 inst(EXTENDED_ARG, ( -- )) {
