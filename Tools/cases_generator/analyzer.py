@@ -315,6 +315,7 @@ class Family:
 @dataclass
 class Analysis:
     instructions: dict[str, Instruction]
+    ext_instructions: dict[str, Instruction]
     uops: dict[str, Uop]
     families: dict[str, Family]
     pseudos: dict[str, PseudoInstruction]
@@ -1235,6 +1236,7 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
+    ext_instructions: dict[str, Instruction] = {}
     uops: dict[str, Uop] = {}
     families: dict[str, Family] = {}
     pseudos: dict[str, PseudoInstruction] = {}
@@ -1243,7 +1245,10 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         match node:
             case parser.InstDef(name):
                 if node.kind == "inst":
-                    desugar_inst(node, instructions, uops)
+                    if "extended" in node.annotations:
+                        desugar_inst(node, ext_instructions, uops)
+                    else:
+                        desugar_inst(node, instructions, uops)
                 else:
                     assert node.kind == "op"
                     add_op(node, uops)
@@ -1282,7 +1287,7 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         families["BINARY_OP"].members.append(inst)
     opmap, first_arg, min_instrumented = assign_opcodes(instructions, families, pseudos)
     return Analysis(
-        instructions, uops, families, pseudos, labels, opmap, first_arg, min_instrumented
+        instructions, ext_instructions, uops, families, pseudos, labels, opmap, first_arg, min_instrumented
     )
 
 

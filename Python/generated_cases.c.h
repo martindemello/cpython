@@ -5539,17 +5539,6 @@
             DISPATCH_GOTO();
         }
 
-        TARGET(EXTENDED_NOP) {
-            #if Py_TAIL_CALL_INTERP
-            int opcode = EXTENDED_NOP;
-            (void)(opcode);
-            #endif
-            frame->instr_ptr = next_instr;
-            next_instr += 1;
-            INSTRUCTION_STATS(EXTENDED_NOP);
-            DISPATCH();
-        }
-
         TARGET(EXTENDED_OPCODE) {
             #if Py_TAIL_CALL_INTERP
             int opcode = EXTENDED_OPCODE;
@@ -5558,6 +5547,8 @@
             frame->instr_ptr = next_instr;
             next_instr += 1;
             INSTRUCTION_STATS(EXTENDED_OPCODE);
+            NEXTOPARG();
+            #include "Python/generated_ext_cases.c.h"
             DISPATCH();
         }
 

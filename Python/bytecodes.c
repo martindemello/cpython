@@ -5173,7 +5173,8 @@ dummy_func(
         }
 
         inst(EXTENDED_OPCODE, ( -- )) {
-
+            NEXTOPARG();
+#include "Python/generated_ext_cases.c.h"
         }
 
         tier1 inst(EXTENDED_ARG, ( -- )) {

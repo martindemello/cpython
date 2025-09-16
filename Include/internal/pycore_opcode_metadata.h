@@ -200,8 +200,6 @@ int _PyOpcode_num_popped(int opcode, int oparg)  {
             return 1;
         case EXTENDED_ARG:
             return 0;
-        case EXTENDED_NOP:
-            return 0;
         case EXTENDED_OPCODE:
             return 0;
         case FORMAT_SIMPLE:
@@ -687,8 +685,6 @@ int _PyOpcode_num_pushed(int opcode, int oparg)  {
             return 0;
         case EXTENDED_ARG:
             return 0;
-        case EXTENDED_NOP:
-            return 0;
         case EXTENDED_OPCODE:
             return 0;
         case FORMAT_SIMPLE:
@@ -1157,7 +1153,6 @@ const struct opcode_metadata _PyOpcode_opcode_metadata[267] = {
     [ENTER_EXECUTOR] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
     [EXIT_INIT_CHECK] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ERROR_NO_POP_FLAG | HAS_ESCAPES_FLAG },
     [EXTENDED_ARG] = { true, INSTR_FMT_IB, HAS_ARG_FLAG },
-    [EXTENDED_NOP] = { true, INSTR_FMT_IX, 0 },
     [EXTENDED_OPCODE] = { true, INSTR_FMT_IX, 0 },
     [FORMAT_SIMPLE] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
     [FORMAT_WITH_SPEC] = { true, INSTR_FMT_IX, HAS_ERROR_FLAG | HAS_ESCAPES_FLAG },
@@ -1598,7 +1593,6 @@ const char *_PyOpcode_OpName[267] = {
     [ENTER_EXECUTOR] = "ENTER_EXECUTOR",
     [EXIT_INIT_CHECK] = "EXIT_INIT_CHECK",
     [EXTENDED_ARG] = "EXTENDED_ARG",
-    [EXTENDED_NOP] = "EXTENDED_NOP",
     [EXTENDED_OPCODE] = "EXTENDED_OPCODE",
     [FORMAT_SIMPLE] = "FORMAT_SIMPLE",
     [FORMAT_WITH_SPEC] = "FORMAT_WITH_SPEC",
@@ -1785,6 +1779,7 @@ const uint8_t _PyOpcode_Caches[256] = {
 extern const uint8_t _PyOpcode_Deopt[256];
 #ifdef NEED_OPCODE_METADATA
 const uint8_t _PyOpcode_Deopt[256] = {
+    [121] = 121,
     [122] = 122,
     [123] = 123,
     [124] = 124,
@@ -1895,7 +1890,6 @@ const uint8_t _PyOpcode_Deopt[256] = {
     [ENTER_EXECUTOR] = ENTER_EXECUTOR,
     [EXIT_INIT_CHECK] = EXIT_INIT_CHECK,
     [EXTENDED_ARG] = EXTENDED_ARG,
-    [EXTENDED_NOP] = EXTENDED_NOP,
     [EXTENDED_OPCODE] = EXTENDED_OPCODE,
     [FORMAT_SIMPLE] = FORMAT_SIMPLE,
     [FORMAT_WITH_SPEC] = FORMAT_WITH_SPEC,
@@ -2046,6 +2040,7 @@ const uint8_t _PyOpcode_Deopt[256] = {
 #endif // NEED_OPCODE_METADATA
 
 #define EXTRA_CASES \
+    case 121: \
     case 122: \
     case 123: \
     case 124: \

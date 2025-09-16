@@ -34,6 +34,7 @@ from lexer import Token
 from stack import Local, Stack, StackError, get_stack_effect, Storage
 
 DEFAULT_OUTPUT = ROOT / "Python/generated_cases.c.h"
+DEFAULT_EXT_OUTPUT = ROOT / "Python/generated_ext_cases.c.h"
 
 
 FOOTER = "#undef TIER_ONE\n"
@@ -270,6 +271,44 @@ def generate_tier1_cases(
         out.emit("}")
         out.emit("\n")
 
+def generate_extended_cases(
+    analysis: Analysis, outfile: TextIO, lines: bool
+) -> None:
+    out = CWriter(outfile, 2, lines)
+    emitter = Emitter(out, analysis.labels)
+    out.emit("\n")
+    out.emit("switch(opcode) {")
+    for name, inst in sorted(analysis.ext_instructions.items()):
+        out.emit("\n")
+        out.emit(f"case {name}: {{\n")
+        popped = get_popped(inst, analysis)
+        needs_this = uses_this(inst)
+        unused_guard = "(void)this_instr;\n"
+
+        if needs_this and not inst.is_target:
+            out.emit(f"_Py_CODEUNIT* const this_instr = next_instr;\n")
+            out.emit(unused_guard)
+        if inst.properties.uses_opcode:
+            out.emit(f"opcode = {name};\n")
+        if inst.family is not None:
+            out.emit(
+                f"static_assert({inst.family.size} == {inst.size-1}"
+                ', "incorrect cache size");\n'
+            )
+        declare_variables(inst, out)
+        offset = 1  # The instruction itself
+        stack = Stack()
+        for part in inst.parts:
+            # Only emit braces if more than one uop
+            insert_braces = len([p for p in inst.parts if isinstance(p, Uop)]) > 1
+            reachable, offset, stack = write_uop(part, emitter, offset, stack, inst, insert_braces)
+        out.start_line()
+        if reachable: # type: ignore[possibly-undefined]
+            stack.flush(out)
+        out.start_line()
+        out.emit("}")
+        out.emit("\n")
+    out.emit("}")
 
 arg_parser = argparse.ArgumentParser(
     description="Generate the code for the interpreter switch.",
@@ -304,3 +343,5 @@ if __name__ == "__main__":
     data = analyze_files(args.input)
     with open(args.output, "w") as outfile:
         generate_tier1(args.input, data, outfile, args.emit_line_directives)
+    with open(DEFAULT_EXT_OUTPUT, "w") as outfile:
+        generate_extended_cases(data, outfile, args.emit_line_directives)
