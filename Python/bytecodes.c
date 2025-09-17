@@ -5173,10 +5173,14 @@ dummy_func(
         }
 
         inst(EXTENDED_OPCODE, ( -- )) {
+            int n_cache = oparg;
             NEXTOPARG();
 #include "Python/generated_ext_cases.c.h"
             frame->instr_ptr = next_instr;
-            next_instr += 1;
+            // Skip over the caches for the extended opcode
+            // NOTE: The compiler is expected to put the number of cache
+            // entries into the oparg for EXTENDED_OPCODE
+            next_instr += 1 + n_cache;
         }
 
         tier1 inst(EXTENDED_ARG, ( -- )) {

@@ -248,12 +248,13 @@ extern "C" {
 #define SETUP_WITH                             265
 #define STORE_FAST_MAYBE_NULL                  266
 
-#define HAVE_ARGUMENT                           44
+#define HAVE_ARGUMENT                           43
 #define MIN_SPECIALIZED_OPCODE                 129
 #define MIN_INSTRUMENTED_OPCODE                234
 
 /* Extended opcodes */
 #define EXTENDED_NOP                             0
+#define XOP_WITH_CACHE                           1
 
 #ifdef __cplusplus
 }

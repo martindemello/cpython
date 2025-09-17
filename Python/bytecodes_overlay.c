@@ -147,6 +147,9 @@ dummy_func(
             fprintf(stderr, "extended nop!\n");
         }
 
+        extended inst(XOP_WITH_CACHE, (--)) {
+            fprintf(stderr, "extended op with cache\n");
+        }
 
 // END BYTECODES //
 
