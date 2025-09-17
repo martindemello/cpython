@@ -321,6 +321,7 @@ class Analysis:
     pseudos: dict[str, PseudoInstruction]
     labels: dict[str, Label]
     opmap: dict[str, int]
+    ext_opmap: dict[str, int]
     have_arg: int
     min_instrumented: int
 
@@ -1120,12 +1121,14 @@ def add_label(
 
 def assign_opcodes(
     instructions: dict[str, Instruction],
+    ext_instructions: dict[str, Instruction],
     families: dict[str, Family],
     pseudos: dict[str, PseudoInstruction],
 ) -> tuple[dict[str, int], int, int]:
     """Assigns opcodes, then returns the opmap,
     have_arg and min_instrumented values"""
     instmap: dict[str, int] = {}
+    ext_instmap: dict[str, int] = {}
 
     # 0 is reserved for cache entries. This helps debugging.
     instmap["CACHE"] = 0
@@ -1202,7 +1205,11 @@ def assign_opcodes(
         instmap[name] = op
         pseudos[name].opcode = op
 
-    return instmap, len(no_arg), min_instrumented
+    # generate opcodes for extended ops
+    for op, name in enumerate(ext_instructions):
+        ext_instmap[name] = op
+
+    return instmap, ext_instmap, len(no_arg), min_instrumented
 
 
 def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop) -> int | None:
@@ -1285,9 +1292,12 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         inst = instructions["BINARY_OP_INPLACE_ADD_UNICODE"]
         inst.family = families["BINARY_OP"]
         families["BINARY_OP"].members.append(inst)
-    opmap, first_arg, min_instrumented = assign_opcodes(instructions, families, pseudos)
+    opmap, ext_opmap, first_arg, min_instrumented = assign_opcodes(
+            instructions, ext_instructions, families, pseudos
+    )
     return Analysis(
-        instructions, ext_instructions, uops, families, pseudos, labels, opmap, first_arg, min_instrumented
+        instructions, ext_instructions, uops, families, pseudos, labels, opmap,
+        ext_opmap, first_arg, min_instrumented
     )
 
 

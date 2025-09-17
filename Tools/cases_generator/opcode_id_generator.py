@@ -40,6 +40,11 @@ def generate_opcode_header(
         write_define("MIN_SPECIALIZED_OPCODE", analysis.opmap["RESUME"]+1)
         write_define("MIN_INSTRUMENTED_OPCODE", analysis.min_instrumented)
 
+        out.emit("\n")
+        out.emit("/* Extended opcodes */\n")
+        for op, name in sorted([(op, name) for (name, op) in analysis.ext_opmap.items()]):
+            write_define(name, op)
+
 
 arg_parser = argparse.ArgumentParser(
     description="Generate the header file with all opcode IDs.",

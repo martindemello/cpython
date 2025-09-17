@@ -144,6 +144,7 @@ dummy_func(
 
 // BEGIN BYTECODES //
         extended inst(EXTENDED_NOP, (--)) {
+            fprintf(stderr, "extended nop!\n");
         }
 
 

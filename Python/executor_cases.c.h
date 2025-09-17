@@ -7007,6 +7007,10 @@
         /* _INSTRUMENTED_POP_JUMP_IF_NOT_NONE is not a viable micro-op for tier 2 because it is instrumented */
 
         case _EXTENDED_OPCODE: {
+            NEXTOPARG();
+            #include "Python/generated_ext_cases.c.h"
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
             break;
         }
 

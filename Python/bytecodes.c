@@ -5175,6 +5175,8 @@ dummy_func(
         inst(EXTENDED_OPCODE, ( -- )) {
             NEXTOPARG();
 #include "Python/generated_ext_cases.c.h"
+            frame->instr_ptr = next_instr;
+            next_instr += 1;
         }
 
         tier1 inst(EXTENDED_ARG, ( -- )) {
