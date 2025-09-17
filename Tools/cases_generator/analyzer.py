@@ -315,11 +315,13 @@ class Family:
 @dataclass
 class Analysis:
     instructions: dict[str, Instruction]
+    ext_instructions: dict[str, Instruction]
     uops: dict[str, Uop]
     families: dict[str, Family]
     pseudos: dict[str, PseudoInstruction]
     labels: dict[str, Label]
     opmap: dict[str, int]
+    ext_opmap: dict[str, int]
     have_arg: int
     min_instrumented: int
 
@@ -535,6 +537,8 @@ def tier_variable(node: parser.CodeDef) -> int | None:
     for token in node.tokens:
         if token.kind == "ANNOTATION":
             if token.text == "specializing":
+                return 1
+            if token.text == "extended":
                 return 1
             if re.fullmatch(r"tier\d", token.text):
                 return int(token.text[-1])
@@ -1117,12 +1121,14 @@ def add_label(
 
 def assign_opcodes(
     instructions: dict[str, Instruction],
+    ext_instructions: dict[str, Instruction],
     families: dict[str, Family],
     pseudos: dict[str, PseudoInstruction],
 ) -> tuple[dict[str, int], int, int]:
     """Assigns opcodes, then returns the opmap,
     have_arg and min_instrumented values"""
     instmap: dict[str, int] = {}
+    ext_instmap: dict[str, int] = {}
 
     # 0 is reserved for cache entries. This helps debugging.
     instmap["CACHE"] = 0
@@ -1136,6 +1142,9 @@ def assign_opcodes(
 
     # This is an historical oddity.
     instmap["BINARY_OP_INPLACE_ADD_UNICODE"] = 3
+
+    # Give this a stable opcode
+    instmap["EXTENDED_OPCODE"] = 127
 
     instmap["INSTRUMENTED_LINE"] = 254
     instmap["ENTER_EXECUTOR"] = 255
@@ -1196,7 +1205,11 @@ def assign_opcodes(
         instmap[name] = op
         pseudos[name].opcode = op
 
-    return instmap, len(no_arg), min_instrumented
+    # generate opcodes for extended ops
+    for op, name in enumerate(ext_instructions):
+        ext_instmap[name] = op
+
+    return instmap, ext_instmap, len(no_arg), min_instrumented
 
 
 def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop) -> int | None:
@@ -1230,6 +1243,7 @@ def get_instruction_size_for_uop(instructions: dict[str, Instruction], uop: Uop)
 
 def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
     instructions: dict[str, Instruction] = {}
+    ext_instructions: dict[str, Instruction] = {}
     uops: dict[str, Uop] = {}
     families: dict[str, Family] = {}
     pseudos: dict[str, PseudoInstruction] = {}
@@ -1238,7 +1252,10 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         match node:
             case parser.InstDef(name):
                 if node.kind == "inst":
-                    desugar_inst(node, instructions, uops)
+                    if "extended" in node.annotations:
+                        desugar_inst(node, ext_instructions, uops)
+                    else:
+                        desugar_inst(node, instructions, uops)
                 else:
                     assert node.kind == "op"
                     add_op(node, uops)
@@ -1275,9 +1292,12 @@ def analyze_forest(forest: list[parser.AstNode]) -> Analysis:
         inst = instructions["BINARY_OP_INPLACE_ADD_UNICODE"]
         inst.family = families["BINARY_OP"]
         families["BINARY_OP"].members.append(inst)
-    opmap, first_arg, min_instrumented = assign_opcodes(instructions, families, pseudos)
+    opmap, ext_opmap, first_arg, min_instrumented = assign_opcodes(
+            instructions, ext_instructions, families, pseudos
+    )
     return Analysis(
-        instructions, uops, families, pseudos, labels, opmap, first_arg, min_instrumented
+        instructions, ext_instructions, uops, families, pseudos, labels, opmap,
+        ext_opmap, first_arg, min_instrumented
     )
 
 
